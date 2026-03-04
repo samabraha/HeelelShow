@@ -13,8 +13,8 @@ class HomeViewModel(
     var uiState by mutableStateOf(
         HomeUIState(
             launchInPortrait = config.launchInPortrait,
-            width = config.width.dp,
-            height = config.height.dp
+            width = config.width,
+            height = config.height
         )
     )
         private set
@@ -22,8 +22,8 @@ class HomeViewModel(
 
 data class HomeUIState(
     val launchInPortrait: Boolean,
-    val width: Dp,
-    val height: Dp,
+    val width: Int,
+    val height: Int,
 ) {
-    val gradientFocus: Float = width.value + 20
+    val gradientFocus: Float = width + 20f
 }

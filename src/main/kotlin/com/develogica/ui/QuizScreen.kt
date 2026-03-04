@@ -57,7 +57,7 @@ fun QuizView(
                     0.05f to backColorA,
                     0.95f to backColorB,
                     startY = 0f,
-                    endY = homeUIState.height.value,
+                    endY = homeUIState.height.toFloat(),
                 )
             )
             .clickable {
@@ -165,7 +165,7 @@ fun LandscapePane(
                     AnimatedVisibility(
                         visible = isVisible,
                         enter = fadeIn(animationSpec = tween(durationMillis = 500)),
-                        modifier = Modifier.Companion.animateItem()
+                        modifier = Modifier.animateItem()
                     ) {
                         val backColor = uiState.optionBackColors[index]
 
@@ -287,7 +287,7 @@ fun PortraitPane(
                 AnimatedVisibility(
                     visible = isVisible,
                     enter = fadeIn(animationSpec = tween(durationMillis = 500)),
-                    modifier = Modifier.Companion.animateItem()
+                    modifier = Modifier.animateItem()
                 ) {
                     val backColor = uiState.optionBackColors[index]
 

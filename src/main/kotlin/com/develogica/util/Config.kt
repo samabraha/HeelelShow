@@ -8,8 +8,9 @@ import kotlin.io.path.pathString
 data class Config(
     var launchInPortrait: Boolean = false,
     var sourceDir: String = Path(develogicaPath, "tig_qz.db").pathString,
-    var width: Float = 1440f,
-    var height: Float = 1920f
+    var imageRoot: String = "D:/Develogica/Zara_Images/",
+    var width: Int = 1440,
+    var height: Int = 720
 ) {
     companion object {
         val develogicaPath: String = Path(System.getProperty("user.home"), "Develogica").pathString

@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
@@ -28,7 +29,9 @@ fun HeelelUI(
     val quizUIState = quizViewModel.uiState
     Window(
         onCloseRequest = exitApplication, title = "Heelel", state = rememberWindowState(
-            position = WindowPosition.Aligned(Alignment.Center), width = homeState.width, height = homeState.height
+            position = WindowPosition.Aligned(Alignment.Center),
+            width = homeState.width.dp,
+            height = homeState.height.dp
         ), resizable = false
     ) {
         MaterialTheme {

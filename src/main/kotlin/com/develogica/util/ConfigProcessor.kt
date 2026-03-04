@@ -1,15 +1,15 @@
 package com.develogica.util
 
 import kotlinx.serialization.json.Json
-import java.io.File
 import kotlin.io.path.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.pathString
 
 class ConfigProcessor(private val args: Array<String>) {
-
     val config: Config
     val commands: Set<Command>
 
-    private val configFile = File(Path(System.getProperty("user.home"), "Develogica").toString(), "heelelShow.config")
+    private val configPath = Path(System.getProperty("user.home"), "Develogica", "heelelShow.config")
     private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
     init {
@@ -17,28 +17,33 @@ class ConfigProcessor(private val args: Array<String>) {
         val (overriddenConfig, parsedCommands) = parseArgs(loadedConfig)
         config = overriddenConfig
         commands = parsedCommands
+
         saveConfig()
     }
 
     private fun loadConfig(): Config {
+        val configFile = configPath.toFile()
         if (configFile.exists()) {
             try {
                 return json.decodeFromString<Config>(configFile.readText())
             } catch (e: Exception) {
-                println("Failed to load config: ${e.message}. Using defaults.")
+                Log.error("Failed to load config: ${e.message}. Using defaults.")
             }
         }
+
+        Log.info("Config file does not exist. Using defaults.")
         return Config()
     }
 
     private fun saveConfig() {
+        val configFile = configPath.toFile()
         try {
             if (!configFile.parentFile.exists()) {
                 configFile.parentFile.mkdirs()
             }
             configFile.writeText(json.encodeToString(config))
         } catch (e: Exception) {
-            println("Failed to save config: ${e.message}")
+            Log.error("Failed to save config: ${e.message}")
         }
     }
 
@@ -59,51 +64,59 @@ class ConfigProcessor(private val args: Array<String>) {
                 "-v", "--version" -> commands.add(Command.ShowVersion)
             }
         }
+
         return tempConfig to commands
     }
 
     private fun handleSource(args: Array<String>, index: Int): String? {
-        if (isValidOption(args, index + 1)) {
-            val path = Path(args[index + 1])
-            if (path.toFile().exists()) {
-                return path.toString()
-            } else {
-                println("Source directory does not exist: '${path}'")
-            }
-        } else {
-            println("No source directory specified")
+        if (isValidOption(args, index + 1).not()) {
+            Log.error("No source directory specified")
+            return null
         }
-        return null
+
+        val path = Path(args[index + 1])
+        if (path.toFile().exists()) {
+            return path.toString()
+        } else {
+            Log.error("Source directory does not exist: '${path}'")
+            return null
+        }
     }
 
     private fun handleImageRoot(args: Array<String>, index: Int): String? {
-        if (isValidOption(args, index + 1)) {
-            val path = Path(args[index + 1])
-            if (path.toFile().exists() && path.toFile().isDirectory) {
-                return path.toString()
-            } else {
-                println("Image root directory does not exist or is not a directory: '${path}'")
-            }
-        } else {
-            println("No image root directory specified")
+        if (isValidOption(args, index + 1).not()) {
+            Log.error("No image root directory specified")
+
+            return null
         }
-        return null
+
+        val path = Path(args[index + 1])
+        if (path.toFile().exists() && path.isDirectory()) {
+            return path.pathString
+        } else {
+            Log.error("Image root directory does not exist or is not a directory: '${path}'")
+            return null
+        }
     }
 
-    private fun handleDimension(args: Array<String>, index: Int): Float? {
-        if (isValidOption(args, index + 1)) {
-            val value = args[index + 1].toFloatOrNull()
-            if (value != null) {
-                return value
-            } else {
-                println("Invalid dimension value: '${args[index + 1]}'")
-            }
-        } else {
-            println("No dimension value specified")
+    private fun handleDimension(args: Array<String>, index: Int): Int? {
+        if (isValidOption(args, index + 1).not()) {
+            Log.error("No dimension value specified")
+            return null
         }
-        return null
+
+        val value = args[index + 1].toIntOrNull()
+        if (value != null && value > 0) {
+            return value
+        } else {
+            Log.error("Invalid dimension value: '${args[index + 1]}'")
+            return null
+        }
     }
 
+    /**
+     * Returns true if the next argument exists and is not a flag
+     *  */
     private fun isValidOption(args: Array<String>, index: Int): Boolean {
         return index < args.size && !args[index].startsWith("-")
     }
