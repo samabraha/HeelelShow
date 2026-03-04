@@ -1,33 +1,34 @@
 package ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import model.*
 import ui.question.ImageView
-import vm.SelectionAction
 import vm.QuizMode
 import vm.QuizViewModel
+import vm.SelectionAction
 
 @Composable
 fun SelectionScreen(quizViewModel: QuizViewModel, modifier: Modifier = Modifier) {
     val questions = quizViewModel.questions
     val selection = quizViewModel.selectedQuestions
 
-    val startSelectionAction: (QuizMode) -> Unit = { mode -> quizViewModel.handleSelectionAction(SelectionAction.StartQuiz(mode)) }
+    val startSelectionAction: (QuizMode) -> Unit =
+        { mode -> quizViewModel.handleSelectionAction(SelectionAction.StartQuiz(mode)) }
 
+    var quizMode by remember { mutableStateOf(quizViewModel.quizMode) }
 
     var tag = ""
     Row(modifier = modifier) {
@@ -46,12 +47,36 @@ fun SelectionScreen(quizViewModel: QuizViewModel, modifier: Modifier = Modifier)
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Button(onClick = { quizViewModel.handleSelectionAction(SelectionAction.ClearSelection) }) { Text("Clear Selection") }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(onClick = { startSelectionAction(QuizMode.ManualReveal) }) { Text("Start in Manual Mode") }
-                Button(onClick = { startSelectionAction(QuizMode.TimedReveal) }) { Text("Start in Timed Reveal Mode") }
-                Button(onClick = { startSelectionAction(QuizMode.TriggeredTimedReveal) }) { Text("Start in Triggered Timed Reveal Mode") }
+            Button(
+                onClick = { quizViewModel.handleSelectionAction(SelectionAction.ClearSelection) }) {
+                Text("Clear Selection")
             }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                QuizMode.entries.forEach { mode ->
+                    Tab(
+                        selected = mode == quizMode,
+                        onClick = { quizMode = mode },
+                        text = { Text(mode.title) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            Column {
+                when (quizMode) {
+                    QuizMode.TimedReveal -> TimedPreferences(modifier = Modifier.background(color = Color(quizMode.ordinal * 10000)))
+                    QuizMode.ManualReveal -> ManualPreferences(modifier = Modifier.background(color = Color(quizMode.ordinal * 10000)))
+                    QuizMode.TriggeredTimedReveal -> TriggeredTimedPreferences(
+                        modifier = Modifier.background(
+                            color = Color(
+                                quizMode.ordinal * 10000
+                            )
+                        )
+                    )
+                }
+            }
+
+            Button(onClick = { startSelectionAction(quizMode) }) { Text("Start") }
         }
 
         val action: (SelectionAction) -> Unit = { action -> quizViewModel.handleSelectionAction(action) }
@@ -60,6 +85,29 @@ fun SelectionScreen(quizViewModel: QuizViewModel, modifier: Modifier = Modifier)
         SelectedList(questions = selection, action = action, modifier = Modifier.weight(2f))
     }
 }
+
+@Composable
+fun ManualPreferences(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(text = "Manual Preferences", fontWeight = FontWeight.Bold)
+    }
+
+}
+
+@Composable
+fun TriggeredTimedPreferences(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(text = "Triggered Timed Preferences", fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun TimedPreferences(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(text = "Timed Preferences", fontWeight = FontWeight.Bold)
+    }
+}
+
 
 @Composable
 fun QuestionList(questions: List<QuestionDTO>, select: (SelectionAction) -> Unit, modifier: Modifier = Modifier) {
@@ -84,8 +132,8 @@ fun QuestionBox(question: QuestionDTO, action: (SelectionAction) -> Unit, modifi
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = modifier.fillMaxWidth().shadow(4.dp).clickable(onClick = { action(SelectionAction.AddQuestion(question)) })
-            .padding(16.dp)
+        modifier = modifier.fillMaxWidth().shadow(4.dp)
+            .clickable(onClick = { action(SelectionAction.AddQuestion(question)) }).padding(16.dp)
     ) {
         if (question.questionType == QuestionType.IS_TEXT && !question.text.isNullOrBlank()) {
             Text(text = question.text, modifier.fillMaxWidth())
@@ -143,7 +191,6 @@ fun SelectedQuestionBox(question: LiveQuestion, action: (SelectionAction) -> Uni
 
         val checked = question.questionMode == QuestionMode.QA
 
-        println("Checked: $checked")
         Switch(
             checked = checked,
             onCheckedChange = {

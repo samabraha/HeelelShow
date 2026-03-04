@@ -131,7 +131,7 @@ class QuizViewModel(
         uiState = uiState.copy(showAnswer = true, isTimerRunning = false)
         delay(answerDuration)
     }
-    
+
     private fun startTimer() {
         uiState = uiState.copy(isTimerRunning = true)
     }
@@ -180,6 +180,8 @@ enum class Mode {
     Playing, Selection
 }
 
-enum class QuizMode {
-    TimedReveal, TriggeredTimedReveal, ManualReveal
+enum class QuizMode(val title: String) {
+    TimedReveal("Timed Reveal"),
+    ManualReveal("Manual Reveal"),
+    TriggeredTimedReveal("Triggered Time"),
 }

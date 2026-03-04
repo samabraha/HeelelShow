@@ -263,10 +263,7 @@ fun PortraitPane(
                     modifier = Modifier.heightIn(min = 150.dp, max = 320.dp),
                 )
             } else {
-                ImageView(
-                    imagePath = uiState.question.image,
-                    orientation = Orientation.Vertical,
-                )
+                ImageView(imagePath = uiState.question.image, orientation = Orientation.Vertical)
             }
         }
 
