@@ -1,7 +1,6 @@
-package ui
+package com.develogica.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,35 +10,42 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import model.*
-import ui.question.ImageView
-import vm.QuizMode
-import vm.QuizViewModel
-import vm.SelectionAction
+import com.develogica.model.LiveQuestion
+import com.develogica.model.Option
+import com.develogica.model.QuestionDTO
+import com.develogica.model.QuestionMode
+import com.develogica.model.QuestionType
+import com.develogica.ui.question.ImageView
+import com.develogica.vm.QuizMode
+import com.develogica.vm.QuizViewModel
+import com.develogica.vm.SelectionAction
 
 @Composable
 fun SelectionScreen(quizViewModel: QuizViewModel, modifier: Modifier = Modifier) {
     val questions = quizViewModel.questions
     val selection = quizViewModel.selectedQuestions
 
+    val timerSeconds by remember { mutableStateOf(quizViewModel.questionDuration.inWholeSeconds.toInt()) }
+
     val startSelectionAction: (QuizMode) -> Unit =
         { mode -> quizViewModel.handleSelectionAction(SelectionAction.StartQuiz(mode)) }
 
     var quizMode by remember { mutableStateOf(quizViewModel.quizMode) }
 
-    var tag = ""
+    var tag by remember { mutableStateOf("") }
+
     Row(modifier = modifier) {
         Column(
             modifier = Modifier.weight(1f).padding(10.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            TextField(value = tag, onValueChange = { tag = it }, label = { Text("Tag") })
+            TextField(value = tag, onValueChange = { tag = it }, label = { Text("Tag") }, singleLine = true)
 
             Button(onClick = { quizViewModel.handleSelectionAction(SelectionAction.SelectQuestions) }) { Text("Load Questions") }
+
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(text = "Loaded: ${questions.size}", fontWeight = FontWeight.Bold)
@@ -64,19 +70,15 @@ fun SelectionScreen(quizViewModel: QuizViewModel, modifier: Modifier = Modifier)
             }
             Column {
                 when (quizMode) {
-                    QuizMode.TimedReveal -> TimedPreferences(modifier = Modifier.background(color = Color(quizMode.ordinal * 10000)))
-                    QuizMode.ManualReveal -> ManualPreferences(modifier = Modifier.background(color = Color(quizMode.ordinal * 10000)))
-                    QuizMode.TriggeredTimedReveal -> TriggeredTimedPreferences(
-                        modifier = Modifier.background(
-                            color = Color(
-                                quizMode.ordinal * 10000
-                            )
-                        )
-                    )
+                    QuizMode.TimedReveal -> TimedPreferences(timerSeconds = timerSeconds)
+                    QuizMode.ManualReveal -> ManualPreferences()
+                    QuizMode.TriggeredTimedReveal -> TriggeredTimedPreferences(timerSeconds = timerSeconds)
                 }
             }
 
-            Button(onClick = { startSelectionAction(quizMode) }) { Text("Start") }
+            Button(
+                onClick = { startSelectionAction(quizMode) }, enabled = selection.isNotEmpty()
+            ) { Text("Start") }
         }
 
         val action: (SelectionAction) -> Unit = { action -> quizViewModel.handleSelectionAction(action) }
@@ -91,23 +93,35 @@ fun ManualPreferences(modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(text = "Manual Preferences", fontWeight = FontWeight.Bold)
     }
-
 }
 
 @Composable
-fun TriggeredTimedPreferences(modifier: Modifier = Modifier) {
+fun TriggeredTimedPreferences(timerSeconds: Int, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(text = "Triggered Timed Preferences", fontWeight = FontWeight.Bold)
+        PickTimerSeconds(seconds = timerSeconds)
     }
 }
 
 @Composable
-fun TimedPreferences(modifier: Modifier = Modifier) {
+fun TimedPreferences(timerSeconds: Int, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(text = "Timed Preferences", fontWeight = FontWeight.Bold)
+        PickTimerSeconds(seconds = timerSeconds)
     }
 }
 
+@Composable
+fun PickTimerSeconds(seconds: Int = 0, modifier: Modifier = Modifier) {
+    var state by remember { mutableStateOf(seconds) }
+
+    TextField(
+        value = state.toString(),
+        onValueChange = { state = it.toIntOrNull() ?: 0 },
+        label = { Text("Seconds") },
+        modifier = modifier
+    )
+}
 
 @Composable
 fun QuestionList(questions: List<QuestionDTO>, select: (SelectionAction) -> Unit, modifier: Modifier = Modifier) {

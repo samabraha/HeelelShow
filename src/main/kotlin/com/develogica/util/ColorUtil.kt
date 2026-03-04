@@ -1,4 +1,4 @@
-package util
+package com.develogica.util
 
 import androidx.compose.ui.graphics.Color
 import kotlin.random.Random

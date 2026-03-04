@@ -1,4 +1,4 @@
-package ui
+package com.develogica.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -27,12 +27,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.develogica.model.QuestionMode
+import com.develogica.model.QuestionType
+import com.develogica.ui.question.ImageView
+import com.develogica.util.FontUtil
+import com.develogica.vm.HomeUIState
+import com.develogica.vm.QuizAction
+import com.develogica.vm.QuizMode
+import com.develogica.vm.QuizViewModel
+import com.develogica.vm.UIState
 import kotlinx.coroutines.delay
-import model.QuestionMode
-import model.QuestionType
-import ui.question.ImageView
-import util.FontUtil
-import vm.*
 
 
 @Composable
@@ -161,7 +165,7 @@ fun LandscapePane(
                     AnimatedVisibility(
                         visible = isVisible,
                         enter = fadeIn(animationSpec = tween(durationMillis = 500)),
-                        modifier = Modifier.animateItem()
+                        modifier = Modifier.Companion.animateItem()
                     ) {
                         val backColor = uiState.optionBackColors[index]
 
@@ -283,7 +287,7 @@ fun PortraitPane(
                 AnimatedVisibility(
                     visible = isVisible,
                     enter = fadeIn(animationSpec = tween(durationMillis = 500)),
-                    modifier = Modifier.animateItem()
+                    modifier = Modifier.Companion.animateItem()
                 ) {
                     val backColor = uiState.optionBackColors[index]
 

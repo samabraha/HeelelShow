@@ -1,4 +1,4 @@
-package model
+package com.develogica.model
 
 data class QuestionDTO(
     val text: String? = null,

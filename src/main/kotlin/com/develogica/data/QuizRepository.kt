@@ -1,11 +1,11 @@
-package data
+package com.develogica.data
 
-import CLArgs
-import model.QuestionDTO
-import model.QuestionType
+import com.develogica.util.Config
+import com.develogica.model.QuestionDTO
+import com.develogica.model.QuestionType
 import kotlin.io.path.Path
 
-class QuizRepository(val clArgs: CLArgs, val quizDao: QuizDao, val imagesRoot: String) {
+class QuizRepository(val config: Config, val quizDao: QuizDao) {
     private val questions: List<QuestionDTO>
     private val tags: Set<String>
 
@@ -26,7 +26,7 @@ class QuizRepository(val clArgs: CLArgs, val quizDao: QuizDao, val imagesRoot: S
         val beforeSize = size
         return map { question ->
             if (question.questionType == QuestionType.IS_IMAGE && question.image != null) {
-                question.copy(image = Path(clArgs.imageRoot, question.image).toString())
+                question.copy(image = Path(config.imageRoot, question.image).toString())
             } else question
         }.filter { q ->
             if (q.questionType == QuestionType.IS_IMAGE && q.image != null) {
@@ -74,7 +74,7 @@ class QuizRepository(val clArgs: CLArgs, val quizDao: QuizDao, val imagesRoot: S
         return filter {
             it.questionType == QuestionType.IS_TEXT
         }.filter { q ->
-            q.text?.length ?: 0 < maxText && q.options.all { it.text.length < maxOption }
+            (q.text?.length ?: 0) < maxText && q.options.all { it.text.length < maxOption }
         }.also {
             println("Removed ${this.size - it.size} wordy questions.")
         }

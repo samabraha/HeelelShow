@@ -1,4 +1,4 @@
-package util
+package com.develogica.util
 
 import java.util.logging.Logger
 

@@ -1,4 +1,4 @@
-package ui.question
+package com.develogica.ui.question
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement

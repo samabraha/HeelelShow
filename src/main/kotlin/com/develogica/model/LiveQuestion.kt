@@ -1,4 +1,4 @@
-package model
+package com.develogica.model
 
 import kotlinx.serialization.Serializable
 

@@ -1,4 +1,4 @@
-package ui
+package com.develogica.ui
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import util.ColorUtil
-import util.FontUtil
+import com.develogica.util.ColorUtil
+import com.develogica.util.FontUtil
 import kotlin.math.ceil
 import kotlin.time.Duration
 

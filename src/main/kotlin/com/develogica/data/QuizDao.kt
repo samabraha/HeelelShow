@@ -1,9 +1,9 @@
-package data
+package com.develogica.data
 
-import CLArgs
+import com.develogica.util.Config
 import kotlinx.serialization.json.Json
-import model.QuestionDTO
-import model.QuestionType
+import com.develogica.model.QuestionDTO
+import com.develogica.model.QuestionType
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
@@ -11,7 +11,7 @@ import kotlin.io.path.Path
 
 private const val tableName = "Questions"
 
-class QuizDao(clArgs: CLArgs) {
+class QuizDao(config: Config) {
     private val connection: Connection
 
     init {
@@ -23,20 +23,27 @@ class QuizDao(clArgs: CLArgs) {
             e.printStackTrace()
         }
 
-        connection = connectToDBFile(clArgs.sourceDir)
+        connection = connectToDBFile(config.sourceDir)
     }
 
     private fun connectToDBFile(location: String): Connection {
-        if (!Path(location).toFile().exists()) {
-            println("Database file does not exist: $location")
+        val path = Path(location)
+        val dbPath = if (path.isAbsolute) {
+            path
         } else {
-            val connection = DriverManager.getConnection("jdbc:sqlite:${location}")
+            Path(System.getProperty("user.home"), "Develogica", location)
+        }
 
+        if (dbPath.toFile().exists()) {
+            val connection = DriverManager.getConnection("jdbc:sqlite:$dbPath")
             if (connection != null) {
                 return connection
             }
+        } else {
+            println("Database file does not exist: $dbPath")
         }
-        throw Exception("Could not connect to database.")
+        
+        throw Exception("Could not connect to database at: $location")
     }
 
     /** Loads n questions from database.

@@ -1,4 +1,4 @@
-package util
+package com.develogica.util
 
 import androidx.compose.ui.text.font.toFontFamily
 import androidx.compose.ui.text.platform.Font
