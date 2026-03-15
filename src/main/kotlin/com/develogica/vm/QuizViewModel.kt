@@ -28,10 +28,14 @@ class QuizViewModel(
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 ) {
     private val random = Random(currentNanoTime())
-    var questions by mutableStateOf( repository.filterQuestions(*tags).shuffled())
-    val selectedQuestions: MutableList<LiveQuestion> = mutableStateListOf()
+    var questions by mutableStateOf(repository.filterQuestions(*tags).shuffled())
+        private set
+    var selectedQuestions: MutableList<LiveQuestion> = mutableStateListOf()
+        private set
+
     val tags = questions.flatMap { it.tags }.toSet()
     var mode: Mode by mutableStateOf(Mode.Selection)
+        private set
 
     val questionDuration: Duration = 7.seconds
     val answerDuration: Duration = 3.seconds
@@ -48,6 +52,7 @@ class QuizViewModel(
                 SelectionAction.ClearSelection -> clearSelection()
                 is SelectionAction.StartQuiz -> startQuiz(selectionAction.mode)
                 is SelectionAction.AddQuestion -> addQuestion(selectionAction.question)
+                SelectionAction.SelectAll -> selectAllQuestions()
                 is SelectionAction.ChangeMode -> switchQuestionMode(selectionAction.question, selectionAction.checked)
                 is SelectionAction.RemoveQuestion -> removeQuestion(selectionAction.question)
             }
@@ -87,6 +92,12 @@ class QuizViewModel(
         if (question !in selectedQuestions) {
             selectedQuestions += question
         }
+    }
+
+    private fun selectAllQuestions() {
+        selectedQuestions.clear()
+        selectedQuestions = questions.map(QuestionDTO::toLiveQuestion).shuffled().toMutableList()
+
     }
 
     private fun removeQuestion(question: LiveQuestion) {
@@ -170,6 +181,7 @@ sealed class SelectionAction {
     data class LoadQuestions(val tag: String) : SelectionAction()
     data class StartQuiz(val mode: QuizMode) : SelectionAction()
     data class AddQuestion(val question: QuestionDTO) : SelectionAction()
+    object SelectAll : SelectionAction()
     data class ChangeMode(val question: LiveQuestion, val checked: Boolean) : SelectionAction()
     data class RemoveQuestion(val question: LiveQuestion) : SelectionAction()
 }

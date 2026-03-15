@@ -55,11 +55,6 @@ fun SelectionScreen(quizViewModel: QuizViewModel, modifier: Modifier = Modifier)
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Button(
-                onClick = { quizViewModel.handleSelectionAction(SelectionAction.ClearSelection) }) {
-                Text("Clear Selection")
-            }
-
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuizMode.entries.forEach { mode ->
                     Tab(
@@ -127,18 +122,31 @@ fun PickTimerSeconds(seconds: Int = 0, modifier: Modifier = Modifier) {
 
 @Composable
 fun QuestionList(questions: List<QuestionDTO>, select: (SelectionAction) -> Unit, modifier: Modifier = Modifier) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = modifier) {
-        items(questions) { question ->
-            QuestionBox(question, action = select)
+    Column(modifier = modifier) {
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = modifier) {
+            items(questions) { question ->
+                QuestionBox(question, action = select)
+            }
         }
+
+        Button(onClick = { select(SelectionAction.SelectAll) }) { Text(text = "Select All") }
     }
 }
 
 @Composable
 fun SelectedList(questions: List<LiveQuestion>, action: (SelectionAction) -> Unit, modifier: Modifier = Modifier) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = modifier) {
-        items(questions) { question ->
-            SelectedQuestionBox(question, action)
+    Column(modifier = modifier) {
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = modifier) {
+            items(questions) { question ->
+                SelectedQuestionBox(question, action)
+            }
+        }
+
+        Button(
+            enabled = questions.isNotEmpty(), onClick = { action(SelectionAction.ClearSelection) }) {
+            Text("Clear Selection")
         }
     }
 }
@@ -159,11 +167,7 @@ fun QuestionBox(question: QuestionDTO, action: (SelectionAction) -> Unit, modifi
             ImageView(question.image)
         }
 
-        FlowRow(maxItemsInEachRow = 2, horizontalArrangement = Arrangement.SpaceBetween) {
-            question.options.forEach { option ->
-                OptionBox(option, modifier = Modifier.weight(1f).widthIn(min = 200.dp, max = 400.dp))
-            }
-        }
+        OptionsPane(options = question.options, modifier = Modifier.fillMaxWidth())
 
         if (!question.moreInfo.isNullOrBlank()) {
             Text(text = question.moreInfo)
@@ -193,11 +197,7 @@ fun SelectedQuestionBox(question: LiveQuestion, action: (SelectionAction) -> Uni
             }
         }
 
-        FlowRow(maxItemsInEachRow = 2, horizontalArrangement = Arrangement.SpaceBetween) {
-            question.options.forEach { option ->
-                OptionBox(option, modifier = Modifier.weight(1f).widthIn(min = 200.dp, max = 400.dp))
-            }
-        }
+        OptionsPane(options = question.options, modifier = Modifier.fillMaxWidth())
 
         if (!question.moreInfo.isNullOrBlank()) {
             Text(text = question.moreInfo)
@@ -216,6 +216,15 @@ fun SelectedQuestionBox(question: LiveQuestion, action: (SelectionAction) -> Uni
     }
 }
 
+
+@Composable
+fun OptionsPane(options: List<Option>, modifier: Modifier = Modifier) {
+    FlowRow(maxItemsInEachRow = 2, horizontalArrangement = Arrangement.SpaceBetween, modifier = modifier) {
+        options.forEach { option ->
+            OptionBox(option, modifier = Modifier.weight(1f).widthIn(min = 200.dp, max = 400.dp))
+        }
+    }
+}
 
 @Composable
 fun OptionBox(option: Option, modifier: Modifier) {
