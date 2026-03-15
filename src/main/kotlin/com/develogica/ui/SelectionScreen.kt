@@ -44,7 +44,9 @@ fun SelectionScreen(quizViewModel: QuizViewModel, modifier: Modifier = Modifier)
         ) {
             TextField(value = tag, onValueChange = { tag = it }, label = { Text("Tag") }, singleLine = true)
 
-            Button(onClick = { quizViewModel.handleSelectionAction(SelectionAction.SelectQuestions) }) { Text("Load Questions") }
+            Button(
+                enabled = tag.isNotBlank(),
+                onClick = { quizViewModel.handleSelectionAction(SelectionAction.LoadQuestions(tag)) }) { Text("Load Questions") }
 
             Spacer(modifier = Modifier.height(10.dp))
 

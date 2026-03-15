@@ -45,14 +45,15 @@ class QuizRepository(val config: Config, val quizDao: QuizDao) {
         return Path(imagePath).toFile().exists()
     }
 
-    fun filterQuestions(hasTags: Set<String>, ensureAllTags: Boolean = false): List<QuestionDTO> {
+    fun filterQuestions(vararg hasTags: String, ensureAllTags: Boolean = false): List<QuestionDTO> {
+        println("Filtering questions for tags: ${hasTags.toList()}")
         if (hasTags.isEmpty()) {
             println("No tags specified, returning all questions.")
             return questions
         }
 
         if (hasTags.none { tags.contains(it) }) {
-            println("None of the ${questions.size} questions contain any of the specified tags: $hasTags")
+            println("None of the ${questions.size} questions contain any of the specified tags: ${hasTags.toSet()}")
             return emptyList()
         }
 

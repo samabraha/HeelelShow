@@ -22,13 +22,13 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class QuizViewModel(
-    repository: QuizRepository,
+    private val repository: QuizRepository,
     vararg tags: String,
     var quizMode: QuizMode = QuizMode.TimedReveal,
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 ) {
     private val random = Random(currentNanoTime())
-    val questions = repository.filterQuestions(tags.toSet()).shuffled()
+    var questions by mutableStateOf( repository.filterQuestions(*tags).shuffled())
     val selectedQuestions: MutableList<LiveQuestion> = mutableStateListOf()
     val tags = questions.flatMap { it.tags }.toSet()
     var mode: Mode by mutableStateOf(Mode.Selection)
@@ -44,7 +44,7 @@ class QuizViewModel(
     fun handleSelectionAction(selectionAction: SelectionAction) {
         coroutineScope.launch {
             when (selectionAction) {
-                SelectionAction.SelectQuestions -> startSelection()
+                is SelectionAction.LoadQuestions -> startSelection(selectionAction.tag)
                 SelectionAction.ClearSelection -> clearSelection()
                 is SelectionAction.StartQuiz -> startQuiz(selectionAction.mode)
                 is SelectionAction.AddQuestion -> addQuestion(selectionAction.question)
@@ -64,7 +64,10 @@ class QuizViewModel(
         }
     }
 
-    private fun startSelection() {
+    private fun startSelection(tag: String) {
+        println("Loading questions for tag: $tag")
+        questions = repository.filterQuestions(tag).shuffled()
+        println("Loaded ${questions.size} questions.")
         mode = Mode.Selection
     }
 
@@ -164,7 +167,7 @@ data class UIState(
 
 sealed class SelectionAction {
     object ClearSelection : SelectionAction()
-    object SelectQuestions : SelectionAction()
+    data class LoadQuestions(val tag: String) : SelectionAction()
     data class StartQuiz(val mode: QuizMode) : SelectionAction()
     data class AddQuestion(val question: QuestionDTO) : SelectionAction()
     data class ChangeMode(val question: LiveQuestion, val checked: Boolean) : SelectionAction()

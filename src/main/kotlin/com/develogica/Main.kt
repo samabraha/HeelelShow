@@ -64,12 +64,12 @@ fun main(args: Array<String>) {
         return
     }
 
-    application {
-        val homeViewModel = HomeViewModel(config = config)
-        val dao = QuizDao(config = config)
-        val repo = QuizRepository(config = config, quizDao = dao)
-        val quizViewModel = QuizViewModel(repository = repo)
+    val homeViewModel = HomeViewModel(config = config)
+    val dao = QuizDao(config = config)
+    val repo = QuizRepository(config = config, quizDao = dao)
+    val quizViewModel = QuizViewModel(repository = repo)
 
+    application {
         HeelelUI(homeViewModel = homeViewModel, quizViewModel = quizViewModel, exitApplication = ::exitApplication)
     }
 }
